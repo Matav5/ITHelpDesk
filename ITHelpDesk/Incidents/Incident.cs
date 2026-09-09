@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ITHelpDesk.Incidents
 {
-    public abstract class Incident
+    public abstract class Incident : ISubject
     {
         int id;
         IncidentType type;
@@ -15,9 +15,6 @@ namespace ITHelpDesk.Incidents
         IncidentPriority priority;
         string description;
         string createdBy;
-
-        public event Action<Incident> OnIncidentStateChanged;
-
         public Incident(int id, IncidentType type, IncidentState state, IncidentPriority priority, string description, string createdBy, IncidentLevel incidentLevel)
         {
             this.Id = id;
@@ -37,13 +34,14 @@ namespace ITHelpDesk.Incidents
             get => state; set
             {
                 state = value;
-                OnIncidentStateChanged?.Invoke(this);
+                Notify();
             }
         }
         internal IncidentType IncidentType { get => type; set => type = value; }
         internal string CreatedBy { get => createdBy; set => createdBy = value; }
         public IncidentLevel IncidentLevel { get => incidentLevel; set => incidentLevel = value; }
 
+        List<IObserver> observers = new List<IObserver>();
         public bool Process()
         {
             try
@@ -65,7 +63,7 @@ namespace ITHelpDesk.Incidents
 
         protected virtual void CloseIncident()
         {
-            state = IncidentState.Solved;
+            State = IncidentState.Resolved;
         }
 
         protected abstract void WorkOnIncident();
@@ -73,12 +71,30 @@ namespace ITHelpDesk.Incidents
         protected abstract void AnalyzeIncident();
         protected virtual void AcceptIncident()
         {
-            state = IncidentState.Processing;
+            State = IncidentState.Processing;
         }
 
         override public string ToString()
         {
             return $"{Id};{IncidentType};{State};{Priority};{Description}";
+        }
+
+        public void Attach(IObserver observer)
+        {
+            observers.Add(observer);
+        }
+
+        public void Detach(IObserver observer)
+        {
+            observers.Remove(observer);
+        }
+
+        public void Notify()
+        {
+            foreach (var observer in observers)
+            {
+                observer.Update(this);
+            }
         }
     }
 }

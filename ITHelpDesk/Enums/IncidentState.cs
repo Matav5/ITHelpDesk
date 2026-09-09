@@ -9,6 +9,6 @@ namespace ITHelpDesk.Enums
         New,
         Processing,
         Escalated,
-        Solved
+        Resolved
     }
 }

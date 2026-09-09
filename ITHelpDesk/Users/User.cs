@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace ITHelpDesk.Users
 {
-    public class User
+    public class User : IObserver
     {
         string userName;
         UserRole userRole;
@@ -41,16 +41,16 @@ namespace ITHelpDesk.Users
             notifications = "";
         }
 
-        internal void OnIncidentStateChanged(Incident incident)
+        public void Update(Incident incident)
         {
             if (incident.CreatedBy == userName)
             {
                 notifications += $"Your created Incident {incident.Id} state changed to {incident.State}\n";
             }
-            else if (UserRole == UserRole.Admin){
+            else if (UserRole == UserRole.Admin)
+            {
                 notifications += $"Incident {incident.Id} state changed to {incident.State}\n";
             }
         }
-
     }
 }

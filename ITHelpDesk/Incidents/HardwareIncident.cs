@@ -26,6 +26,7 @@ namespace ITHelpDesk
         protected override void WorkOnIncident()
         {
             Console.WriteLine("Pressed on/off switch. Working on hadware and documenting");
+            throw new Exception("Hardware issue could not be resolved as it is not fixable by turnig it on and off again");
         }
     }
 }

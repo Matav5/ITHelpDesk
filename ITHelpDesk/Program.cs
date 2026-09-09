@@ -18,18 +18,14 @@ namespace ITHelpDesk
             LoadIncidents();
             Login();
             SetupNotifications();
-            while (true)
-            {
-                Console.Clear();
-                UserAction();
-            }
+            UserAction();
         }
 
         private static void SetupNotifications()
         {
-            foreach(Incident incident in storageServiceDTO.Incidents)
+            foreach (Incident incident in storageServiceDTO.Incidents)
             {
-                incident.OnIncidentStateChanged += loggedUser.OnIncidentStateChanged;
+                incident.Attach(loggedUser);
             }
         }
 
@@ -40,25 +36,24 @@ namespace ITHelpDesk
             while (run)
             {
 
-                while (run)
+
+                ShowAllIncidents();
+                ShowNotifications();
+                Console.WriteLine("Vyberte Akci (process,exit):");
+                string choice = Console.ReadLine();
+                switch (choice)
                 {
-                    ShowAllIncidents();
-                    ShowNotifications();
-                    Console.WriteLine("Vyberte Akci (process,exit):");
-                    string choice = Console.ReadLine();
-                    switch (choice)
-                    {
 
-                        case "process":
-                            ProcessIncidents();
-                            run = false;
-                            break;
+                    case "process":
+                        ProcessIncidents();
+                        run = false;
+                        break;
 
-                        case "exit":
-                            run = false;
-                            break;
-                    }
+                    case "exit":
+                        run = false;
+                        break;
                 }
+
             }
         }
 
@@ -82,7 +77,7 @@ namespace ITHelpDesk
             L3Handler l3Handler = new L3Handler(l3User);
             l1Handler.Next = l2Handler;
             l2Handler.Next = l3Handler;
-            List<Incident> incidentsToProcess = storageServiceDTO.Incidents.FindAll(incident => incident.State == Enums.IncidentState.New);
+            List<Incident> incidentsToProcess = storageServiceDTO.Incidents.FindAll(incident => incident.State != Enums.IncidentState.Resolved && incident.State != Enums.IncidentState.Processing);
             foreach (Incident incident in incidentsToProcess)
             {
                 l1Handler.HandleIncident(incident);
@@ -98,24 +93,7 @@ namespace ITHelpDesk
             }
         }
 
-      
-        private static Incident? IncidentByInput()
-        {
 
-            while (true)
-            {
-                Console.WriteLine("Vyber incident podle ID");
-                int id = int.Parse(Console.ReadLine());
-                Incident? chosenIncident = storageServiceDTO.Incidents.Find((incident) => incident.Id == id);
-                if (chosenIncident != null)
-                {
-                    return chosenIncident;
-                }
-            }
-        }
-
-
-   
         private static void LoadIncidents()
         {
             storageServiceDTO = JsonStorage.Load();
