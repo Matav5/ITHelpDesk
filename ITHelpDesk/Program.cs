@@ -8,7 +8,6 @@ using System.Xml.Linq;
 namespace ITHelpDesk
 {
 
-    //Udělat nestatickou appku
     internal class Program
     {
         static StorageServiceDTO storageServiceDTO;
